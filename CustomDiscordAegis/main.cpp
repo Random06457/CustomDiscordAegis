@@ -29,9 +29,9 @@ void PerformRelocation(char* baseAddr, aegis_info_t* info)
 			DWORD oldProtect = 0;
 			VirtualProtect(procAddr, sizeof(procAddr), PAGE_READWRITE, &oldProtect);
 
-			char* procName = (!(*procNamePtr >> ((sizeof(void*)-1)*8)))
-				? (char*)(baseAddr + *procNamePtr + 2)
-				: (char*)(*procNamePtr & INTPTR_MAX);
+			char* procName = (*procNamePtr & (~INTPTR_MAX))
+				? (char*)(*procNamePtr & INTPTR_MAX)
+				: (char*)(baseAddr + *procNamePtr + 2);
 
 			*procAddr = GetProcAddress(libModule, procName);
 
@@ -69,7 +69,7 @@ DWORD FindDiscordPid()
 
 void AegisMain(int unk, aegis_info_t* info)
 {
-	//get discord's path and kill the discord parent process
+	//kill the discord parent process
 	DWORD discordPid = FindDiscordPid();
 	if (discordPid)
 	{
